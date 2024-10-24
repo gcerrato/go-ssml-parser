@@ -197,6 +197,7 @@ func (parser *SSMLParser) addNode(parent *SSMLNode, index int, tokens []Token, m
 	return parser.addNode(parent, index+1, tokens, maxParsed)
 }
 
+/* loop form */
 func (parser *SSMLParser) constructSSMLTree(tokens []Token) *SSMLNode {
 	var root *SSMLNode
 	var current *SSMLNode
@@ -205,7 +206,6 @@ func (parser *SSMLParser) constructSSMLTree(tokens []Token) *SSMLNode {
 	for i := 0; i < len(tokens); i++ {
 		token := tokens[i]
 
-		// If it's a closing tag, we pop from the stack
 		if token.isClosingTag() {
 			if len(stack) > 0 {
 				current = stack[len(stack)-1]
@@ -214,8 +214,7 @@ func (parser *SSMLParser) constructSSMLTree(tokens []Token) *SSMLNode {
 			continue
 		}
 
-		// Create a node for either an opening tag or a text token
-		node := newNode(token.extractValue(), parser.ParseAttributes(token.value))
+		node := parser.getNodeFromToken(token)
 
 		if root == nil {
 			root = node
@@ -225,7 +224,6 @@ func (parser *SSMLParser) constructSSMLTree(tokens []Token) *SSMLNode {
 			current.children = append(current.children, node)
 		}
 
-		// If it's an opening tag, we push the current node onto the stack
 		if token.isOpeningTag() {
 			stack = append(stack, current)
 			current = node
